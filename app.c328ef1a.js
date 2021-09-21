@@ -117,8 +117,29 @@ parcelRequire = (function (modules, cache, entry, globalName) {
   }
 
   return newRequire;
-})({"app.js":[function(require,module,exports) {
-var galleryItems = [{
+})({"refs.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = void 0;
+var _default = {
+  galleryContainerRef: document.querySelector('.js-gallery'),
+  modalWindowRef: document.querySelector('.lightbox'),
+  closeModalBtnRef: document.querySelector('[data-action="close-lightbox"]'),
+  lightboxImageRef: document.querySelector('.lightbox__image'),
+  lightboxOverlayRef: document.querySelector('.lightbox__overlay')
+};
+exports.default = _default;
+},{}],"gallery-items.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = void 0;
+var _default = [{
   preview: 'https://cdn.pixabay.com/photo/2019/05/14/16/43/himilayan-blue-poppy-4202825__340.jpg',
   original: 'https://cdn.pixabay.com/photo/2019/05/14/16/43/himilayan-blue-poppy-4202825_1280.jpg',
   description: 'Hokkaido Flower'
@@ -155,15 +176,21 @@ var galleryItems = [{
   original: 'https://cdn.pixabay.com/photo/2019/05/17/04/35/lighthouse-4208843_1280.jpg',
   description: 'Lighthouse Coast Sea'
 }];
-var refs = {
-  galleryContainerRef: document.querySelector('.js-gallery'),
-  modalWindowRef: document.querySelector('.lightbox'),
-  closeModalBtnRef: document.querySelector('[data-action="close-lightbox"]'),
-  lightboxImageRef: document.querySelector('.lightbox__image'),
-  lightboxOverlayRef: document.querySelector('.lightbox__overlay')
-};
-var galleryMarkup = createGalleryMarkup(galleryItems);
-refs.galleryContainerRef.insertAdjacentHTML('beforeend', galleryMarkup);
+exports.default = _default;
+},{}],"markup.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.galleryMarkup = void 0;
+
+var _galleryItems = _interopRequireDefault(require("./gallery-items"));
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+var galleryMarkup = createGalleryMarkup(_galleryItems.default);
+exports.galleryMarkup = galleryMarkup;
 
 function createGalleryMarkup(photos) {
   return photos.map(function (_ref) {
@@ -173,8 +200,138 @@ function createGalleryMarkup(photos) {
     return "<li class=\"gallery__item\">\n    <a\n     class=\"gallery__link\"\n     href=\"".concat(original, "\"\n    >\n     <img\n      class=\"gallery__image\"\n      src=").concat(preview, "\n      data-source=").concat(original, "\n      alt=").concat(description, "\n     />\n    </a>\n   </li>");
   }).join('');
 }
+},{"./gallery-items":"gallery-items.js"}],"getAttributes.js":[function(require,module,exports) {
+"use strict";
 
-refs.galleryContainerRef.addEventListener('click', onModalOpen);
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.getImageAttributes = getImageAttributes;
+
+var _refs = _interopRequireDefault(require("./refs"));
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function getImageAttributes(src, alt) {
+  _refs.default.lightboxImageRef.src = src;
+  _refs.default.lightboxImageRef.alt = alt;
+}
+},{"./refs":"refs.js"}],"modal-window.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.onRightPress = onRightPress;
+exports.onLeftPress = onLeftPress;
+
+var _galleryItems = _interopRequireDefault(require("./gallery-items"));
+
+var _refs = _interopRequireDefault(require("./refs"));
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function onRightPress() {
+  var indexOfCurrentImage = _galleryItems.default.findIndex(function (image) {
+    return image.original === _refs.default.lightboxImageRef.src;
+  });
+
+  if (indexOfCurrentImage !== _galleryItems.default.length - 1) {
+    _refs.default.lightboxImageRef.src = _galleryItems.default[indexOfCurrentImage + 1].original;
+    _refs.default.lightboxImageRef.alt = _galleryItems.default[indexOfCurrentImage + 1].description;
+  } else {
+    _refs.default.lightboxImageRef.src = _galleryItems.default[0].original;
+    _refs.default.lightboxImageRef.alt = _galleryItems.default[0].description;
+  }
+}
+
+function onLeftPress() {
+  var indexOfCurrentImage = _galleryItems.default.findIndex(function (image) {
+    return image.original === _refs.default.lightboxImageRef.src;
+  });
+
+  if (indexOfCurrentImage !== 0) {
+    _refs.default.lightboxImageRef.src = _galleryItems.default[indexOfCurrentImage - 1].original;
+    _refs.default.lightboxImageRef.alt = _galleryItems.default[indexOfCurrentImage - 1].description;
+  } else {
+    _refs.default.lightboxImageRef.src = _galleryItems.default[_galleryItems.default.length - 1].original;
+    _refs.default.lightboxImageRef.alt = _galleryItems.default[_galleryItems.default.length - 1].description;
+  }
+}
+},{"./gallery-items":"gallery-items.js","./refs":"refs.js"}],"keyPress.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.onKeyPress = onKeyPress;
+
+var _modalWindow = require("./modal-window");
+
+var _modalClose = require("./modal-close");
+
+function onKeyPress(e) {
+  if (e.code === 'ArrowRight') {
+    (0, _modalWindow.onRightPress)();
+  }
+
+  if (e.code === 'ArrowLeft') {
+    (0, _modalWindow.onLeftPress)();
+  }
+
+  if (e.code === 'Escape') {
+    (0, _modalClose.onModalCLose)();
+  }
+}
+},{"./modal-window":"modal-window.js","./modal-close":"modal-close.js"}],"modal-close.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.onModalCLose = onModalCLose;
+exports.onOverlayClick = onOverlayClick;
+
+var _refs = _interopRequireDefault(require("./refs"));
+
+var _keyPress = require("./keyPress");
+
+var _getAttributes = require("./getAttributes");
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function onModalCLose() {
+  _refs.default.modalWindowRef.classList.remove('is-open');
+
+  (0, _getAttributes.getImageAttributes)('', '');
+  window.removeEventListener('keydown', _keyPress.onKeyPress);
+}
+
+function onOverlayClick() {
+  onModalCLose();
+}
+},{"./refs":"refs.js","./keyPress":"keyPress.js","./getAttributes":"getAttributes.js"}],"app.js":[function(require,module,exports) {
+"use strict";
+
+var _refs = _interopRequireDefault(require("./refs"));
+
+var _markup = require("./markup");
+
+var _getAttributes = require("./getAttributes");
+
+var _modalClose = require("./modal-close");
+
+var _keyPress = require("./keyPress");
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+_refs.default.galleryContainerRef.insertAdjacentHTML('beforeend', _markup.galleryMarkup);
+
+_refs.default.galleryContainerRef.addEventListener('click', onModalOpen);
+
+_refs.default.closeModalBtnRef.addEventListener('click', _modalClose.onModalCLose);
+
+_refs.default.lightboxOverlayRef.addEventListener('click', _modalClose.onOverlayClick);
 
 function onModalOpen(e) {
   e.preventDefault();
@@ -183,72 +340,12 @@ function onModalOpen(e) {
     return;
   }
 
-  refs.modalWindowRef.classList.add('is-open');
-  getImageAttributes(e.target.dataset.source, e.target.alt);
-  window.addEventListener('keydown', onEscPress);
+  _refs.default.modalWindowRef.classList.add('is-open');
+
+  (0, _getAttributes.getImageAttributes)(e.target.dataset.source, e.target.alt);
+  window.addEventListener('keydown', _keyPress.onKeyPress);
 }
-
-function getImageAttributes(src, alt) {
-  refs.lightboxImageRef.src = src;
-  refs.lightboxImageRef.alt = alt;
-}
-
-refs.closeModalBtnRef.addEventListener('click', onModalCLose);
-
-function onModalCLose() {
-  refs.modalWindowRef.classList.remove('is-open');
-  getImageAttributes('', '');
-  window.removeEventListener('keydown', onEscPress);
-}
-
-refs.lightboxOverlayRef.addEventListener('click', onOverlayClick);
-
-function onOverlayClick() {
-  onModalCLose();
-}
-
-function onEscPress(e) {
-  if (e.code === 'ArrowRight') {
-    onRightPress();
-  }
-
-  if (e.code === 'ArrowLeft') {
-    onLeftPress();
-  }
-
-  if (e.code === 'Escape') {
-    onModalCLose();
-  }
-}
-
-function onRightPress() {
-  var indexOfCurrentImage = galleryItems.findIndex(function (image) {
-    return image.original === refs.lightboxImageRef.src;
-  });
-
-  if (indexOfCurrentImage !== galleryItems.length - 1) {
-    refs.lightboxImageRef.src = galleryItems[indexOfCurrentImage + 1].original;
-    refs.lightboxImageRef.alt = galleryItems[indexOfCurrentImage + 1].description;
-  } else {
-    refs.lightboxImageRef.src = galleryItems[0].original;
-    refs.lightboxImageRef.alt = galleryItems[0].description;
-  }
-}
-
-function onLeftPress() {
-  var indexOfCurrentImage = galleryItems.findIndex(function (image) {
-    return image.original === refs.lightboxImageRef.src;
-  });
-
-  if (indexOfCurrentImage !== 0) {
-    refs.lightboxImageRef.src = galleryItems[indexOfCurrentImage - 1].original;
-    refs.lightboxImageRef.alt = galleryItems[indexOfCurrentImage - 1].description;
-  } else {
-    refs.lightboxImageRef.src = galleryItems[galleryItems.length - 1].original;
-    refs.lightboxImageRef.alt = galleryItems[galleryItems.length - 1].description;
-  }
-}
-},{}],"node_modules/parcel-bundler/src/builtins/hmr-runtime.js":[function(require,module,exports) {
+},{"./refs":"refs.js","./markup":"markup.js","./getAttributes":"getAttributes.js","./modal-close":"modal-close.js","./keyPress":"keyPress.js"}],"node_modules/parcel-bundler/src/builtins/hmr-runtime.js":[function(require,module,exports) {
 var global = arguments[3];
 var OVERLAY_ID = '__parcel__error__overlay__';
 var OldModule = module.bundle.Module;
@@ -276,7 +373,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "58953" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "54037" + '/');
 
   ws.onmessage = function (event) {
     checkedAssets = {};
